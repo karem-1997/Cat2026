@@ -278,6 +278,21 @@
             white-space: nowrap;
         }
 
+        /* ====== MINI TABS (طلباتي / سجل الدفعات) ====== */
+        .mini-tabs { display: flex; gap: 8px; margin-bottom: 4px; }
+        .mini-tab {
+            flex: 1; padding: 8px 4px; margin: 0; font-size: 12px; font-weight: 700;
+            border-radius: 10px; background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            color: var(--text-secondary); cursor: pointer;
+            box-shadow: none; text-transform: none; letter-spacing: 0;
+            transition: all 0.25s ease;
+        }
+        .mini-tab:hover { border-color: var(--primary-color); color: #fff; }
+        .mini-tab.active { background: linear-gradient(135deg, var(--primary-color), var(--primary-dark)); color: #fff; border-color: var(--primary-color); }
+        #tabContentOrders, #tabContentPayments { overflow-x: auto; }
+        #tabContentOrders table, #tabContentPayments table { font-size: 10px; min-width: 100%; }
+
         /* ====== ADMIN DEPT LIST ====== */
         .dept-admin-card { background: rgba(255,215,0,0.05); border: 1px solid rgba(255,215,0,0.3); border-radius: 12px; padding: 10px 14px; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; }
         .dept-admin-card .dept-admin-name { flex: 1; font-weight: 700; font-size: 14px; color: var(--text-color); }
@@ -1558,7 +1573,7 @@
 </div>
 
 <!-- Hamburger Menu Button (Top Right) -->
-<div class="hamburger-menu" onclick="toggleLoginMenu()">
+<div class="hamburger-menu" onclick="toggleAppMenu()">
     <div class="hamburger-line"></div>
     <div class="hamburger-line"></div>
     <div class="hamburger-line"></div>
@@ -1593,7 +1608,54 @@
     </div>
 </div>
 
+<!-- USER MENU OVERLAY (الرصيد/المديونية/طلباتي — من زرار الثلاث شرط) -->
+<div id="userMenuOverlay" class="login-menu-overlay" onclick="closeUserMenu(event)">
+    <div class="login-menu-panel" onclick="event.stopPropagation()">
+        <div class="login-menu-header">
+            <div class="login-menu-close" onclick="toggleUserMenu()">✕</div>
+            <div style="font-size: 46px; margin-bottom: 5px; filter: drop-shadow(0 0 15px rgba(255,215,0,0.4));">🐱</div>
+            <h3 style="color: var(--primary-color); font-size: 17px; margin: 0;" id="userMenuName">المستخدم</h3>
+        </div>
 
+        <!-- 💎 الرصيد + 📉 المديونية -->
+        <div style="display:flex; gap:8px; margin-bottom:12px;">
+            <div style="flex:1; text-align:center; background:rgba(0,204,102,0.12); border:1px solid var(--success-color); border-radius:12px; padding:10px 6px;">
+                <div style="font-size:10px; color:var(--text-secondary);">💎 الرصيد</div>
+                <div style="font-size:17px; font-weight:800; color:var(--success-color);"><span id="userBalanceValue">0.00</span> $</div>
+            </div>
+            <div style="flex:1; text-align:center; background:rgba(255,26,26,0.12); border:1px solid var(--primary-color); border-radius:12px; padding:10px 6px;">
+                <div style="font-size:10px; color:var(--text-secondary);">📉 المديونية</div>
+                <div style="font-size:17px; font-weight:800; color:var(--primary-color);"><span id="userDebtValue">0.00</span> $</div>
+            </div>
+        </div>
+
+        <!-- 📋 طلباتي / 💵 سجل الدفعات -->
+        <div class="mini-tabs">
+            <button type="button" id="tabOrders" class="mini-tab" onclick="toggleUserTab('orders')">📋 طلباتي</button>
+            <button type="button" id="tabPayments" class="mini-tab" onclick="toggleUserTab('payments')">💵 سجل الدفعات</button>
+        </div>
+        <div id="tabContentOrders" style="display:none; max-height:46vh; overflow-y:auto;">
+            <div id="userOrdersContainer">
+                <div class="empty-state"><div class="empty-icon">📭</div><p>لا توجد طلبات حتى الآن</p></div>
+            </div>
+        </div>
+        <div id="tabContentPayments" style="display:none; max-height:46vh; overflow-y:auto;">
+            <div id="userPaymentsSummary" style="background: linear-gradient(135deg, rgba(0,204,102,0.1), rgba(0,153,77,0.1)); border: 1px solid var(--success-color); border-radius: 12px; padding: 12px; text-align: center; margin-bottom: 12px; display: none;">
+                <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 2px;">إجمالي الدفعات المسددة</div>
+                <div style="font-size: 24px; font-weight: 800; color: var(--success-color); text-shadow: 0 0 20px rgba(0,204,102,0.5);" id="userTotalPayments">0.00</div>
+                <div style="font-size: 12px; color: var(--text-secondary);">دولار أمريكي</div>
+            </div>
+            <div id="userPaymentsContainer">
+                <div class="empty-state"><div class="empty-icon">📭</div><p>لا توجد دفعات مسجلة حتى الآن</p></div>
+            </div>
+        </div>
+
+        <div class="login-menu-footer">
+            <div style="font-size: 24px; margin-bottom: 5px;">🐱</div>
+            <p style="color: var(--primary-color); font-size: 12px; font-weight: 700; margin: 0;">وكالة القطة الشقية</p>
+        </div>
+    </div>
+</div>
 
 <div class="container">
     <!-- LOGIN PAGE -->
@@ -1857,16 +1919,6 @@
             <div class="warning-sub">لا يمكنك تقديم طلب جديد حتى يتم معالجة طلبك الحالي. يرجى الانتظار.</div>
         </div>
 
-<div class="balance-display">
-            <div class="balance-label">💎 الرصيد المتاح (للعرض فقط)</div>
-            <div><span class="balance-value" id="userBalanceValue">0.00</span> <span class="balance-currency">$</span></div>
-        </div>
-
-        <div class="debt-display">
-            <div class="debt-label">💰 المديونية الحالية</div>
-            <div><span class="debt-value" id="userDebtValue">0.00</span> <span class="debt-currency">$</span></div>
-        </div>
-
         <div class="box-light">
             <div class="section-title">
                 <span class="section-icon">🗂️</span>
@@ -1909,6 +1961,7 @@
                     <label>اكتب الـ ID المراد الشحن له</label>
                     <input type="text" id="userOtherTargetId" placeholder="الـ ID البديل">
                 </div>
+                <div id="customFieldsContainer"></div>
                 <div class="form-group">
                     <label>مبلغ الشحن</label>
                     <input type="number" id="userChargeAmount" required placeholder="0.00" min="1" oninput="checkBalance()">
@@ -1916,31 +1969,6 @@
                 <button type="submit" id="submitRequestBtn">🚀 إرسال الطلب</button>
             <p style="color: var(--text-secondary); font-size: 11px; margin-top: 8px; text-align: center;">💡 الرصيد للعرض فقط - المبلغ سيضاف للمديونية</p>
             </form>
-        </div>
-        <div class="box-light">
-            <div class="section-title">
-                <span class="section-icon">📋</span>
-                <h3>طلباتي</h3>
-            </div>
-            <div id="userOrdersContainer">
-                <div class="empty-state"><div class="empty-icon">📭</div><p>لا توجد طلبات حتى الآن</p></div>
-            </div>
-        </div>
-
-        <!-- سجل الدفعات الجزئية -->
-        <div class="box-light" style="border: 1px solid var(--success-color); margin-top: 20px;">
-            <div class="section-title">
-                <span class="section-icon">💵</span>
-                <h3>سجل الدفعات</h3>
-            </div>
-            <div id="userPaymentsSummary" style="background: linear-gradient(135deg, rgba(0,204,102,0.1), rgba(0,153,77,0.1)); border: 1px solid var(--success-color); border-radius: 12px; padding: 16px; text-align: center; margin-bottom: 16px; display: none;">
-                <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 4px;">إجمالي الدفعات المسددة</div>
-                <div style="font-size: 32px; font-weight: 800; color: var(--success-color); text-shadow: 0 0 20px rgba(0,204,102,0.5);" id="userTotalPayments">0.00</div>
-                <div style="font-size: 14px; color: var(--text-secondary);">دولار أمريكي</div>
-            </div>
-            <div id="userPaymentsContainer">
-                <div class="empty-state"><div class="empty-icon">📭</div><p>لا توجد دفعات مسجلة حتى الآن</p></div>
-            </div>
         </div>
         <button type="button" class="btn-secondary" onclick="logoutUser()" style="margin-top: 20px;">تسجيل خروج</button>
     </div>
@@ -2031,6 +2059,12 @@
                 <div class="form-group">
                     <label>📝 وصف مختصر:</label>
                     <input type="text" id="newAppDesc" placeholder="مثال: شحن UC - شحن فوري">
+                </div>
+                <div class="form-group">
+                    <label>🧩 خانات مخصصة (بتظهر للعميل لما يختار الخدمة دي):</label>
+                    <div id="customFieldsList"></div>
+                    <button type="button" onclick="addCustomFieldRow()" style="background: linear-gradient(135deg, var(--accent-blue), #005580) !important; padding: 8px; font-size: 12px;">➕ إضافة خانة</button>
+                    <p style="color: var(--text-secondary); font-size: 11px; margin-top: 6px;">💡 مثال: خانة "يوزر تليجرام" أو "رقم الهاتف" — سيبها فاضية لو مفيش خانات خاصة</p>
                 </div>
                 <div class="form-group">
                     <label>
@@ -2537,8 +2571,24 @@
                 amtInput.style.opacity = '1';
             }
         }
+        renderUserCustomFields(app);
         checkBalance();
         showToast('✅ تم اختيار: ' + app.name);
+    }
+
+    function renderUserCustomFields(app) {
+        const c = document.getElementById('customFieldsContainer');
+        if (!c) return;
+        if (!app || !app.fields || !app.fields.length) { c.innerHTML = ''; return; }
+        let html = '';
+        app.fields.forEach(f => {
+            const safe = (f.label || '').replace(/"/g, '&quot;');
+            html += '<div class="form-group">';
+            html += '<label>🧩 ' + (f.label || 'خانة') + (f.required ? ' <span style="color:var(--danger-color);font-weight:800;">*</span>' : '') + '</label>';
+            html += '<input type="text" class="user-cf-input" data-label="' + safe + '" data-required="' + (f.required ? '1' : '0') + '" placeholder="اكتب ' + (f.label || '') + ' هنا...">';
+            html += '</div>';
+        });
+        c.innerHTML = html;
     }
 
     function saveFrameUrl() {
@@ -2553,6 +2603,33 @@
 
     let editingAppKey = null;
 
+    function addCustomFieldRow(label, required) {
+        const list = document.getElementById('customFieldsList');
+        if (!list) return;
+        const row = document.createElement('div');
+        row.className = 'cf-row';
+        row.style.cssText = 'display:flex;gap:6px;margin-bottom:6px;align-items:center;';
+        row.innerHTML = '<input type="text" class="cf-label" placeholder="اسم الخانة (مثال: يوزر تليجرام)" value="' + (label || '').replace(/"/g, '&quot;') + '" style="flex:2;margin:0;">' +
+            '<label style="flex:1;font-size:10px;display:flex;align-items:center;gap:3px;margin:0;white-space:nowrap;"><input type="checkbox" class="cf-required" ' + (required ? 'checked' : '') + ' style="width:auto;"> إجباري</label>' +
+            '<button type="button" class="btn-danger" style="width:auto;padding:4px 8px;margin:0;font-size:11px;" onclick="this.parentNode.remove()">✕</button>';
+        list.appendChild(row);
+    }
+
+    function collectCustomFields() {
+        const rows = document.querySelectorAll('#customFieldsList .cf-row');
+        const fields = [];
+        rows.forEach(r => {
+            const lbl = r.querySelector('.cf-label').value.trim();
+            if (lbl) fields.push({ label: lbl, required: r.querySelector('.cf-required').checked });
+        });
+        return fields;
+    }
+
+    function clearCustomFieldsEditor() {
+        const list = document.getElementById('customFieldsList');
+        if (list) list.innerHTML = '';
+    }
+
     function editApp(key) {
         const app = availableApps.find(a => a._key === key);
         if (!app) return;
@@ -2564,6 +2641,8 @@
         document.getElementById('newAppIcon').value = app.icon || '';
         document.getElementById('newAppDesc').value = app.description || '';
         document.getElementById('newAppActive').checked = app.active !== false;
+        clearCustomFieldsEditor();
+        if (app.fields && app.fields.length) app.fields.forEach(f => addCustomFieldRow(f.label, f.required));
         document.getElementById('appFormBtn').innerText = '💾 حفظ التعديلات';
         document.getElementById('appFormCancel').style.display = 'block';
         showToast('✏️ وضع تعديل: ' + (app.name || ''));
@@ -2577,6 +2656,7 @@
         document.getElementById('newAppIcon').value = '';
         document.getElementById('newAppDesc').value = '';
         document.getElementById('newAppActive').checked = true;
+        clearCustomFieldsEditor();
         document.getElementById('appFormBtn').innerText = '➕ إضافة الخدمة';
         document.getElementById('appFormCancel').style.display = 'none';
     }
@@ -2593,6 +2673,8 @@
         if (!name) { alert('❌ يرجى إدخال اسم البرنامج!'); return; }
         const appData = { name: name, icon: icon, description: desc, active: active, deptKey: deptKey || '' };
         if (priceRaw) appData.price = parseFloat(priceRaw);
+        const cfFields = collectCustomFields();
+        if (cfFields.length) appData.fields = cfFields;
         if (editingAppKey) {
             appData.updatedAt = new Date().toLocaleDateString('en-US') + ', ' + new Date().toLocaleTimeString('en-US');
             db.ref('apps/' + editingAppKey).update(appData)
@@ -3296,6 +3378,7 @@ function generateTxnCode() {
                             '📉 <strong>المديونية:</strong> <span style="color:var(--danger-color);font-weight:700;">' + userDebtNotif + ' $</span><br>' +
                             'المبلغ: <strong style="color:var(--primary-color);">' + req.amount + ' $</strong><br>' +
                             (appName ? appName : '') +
+                            (req.customFields && req.customFields.length ? req.customFields.map(function(f) { return '📋 ' + f.label + ': <strong>' + f.value + '</strong><br>'; }).join('') : '') +
                             'الوجهة: ' + destText + targetIdCopyBtn + '<br>' +
                             '<button class="btn-copy" onclick="copyToClipboard(\'' + copyText + '\')">📋 نسخ الكل</button><br>' +
                             'الوقت: ' + req.time +
@@ -3347,6 +3430,14 @@ function generateTxnCode() {
             const chargeDest = document.querySelector('input[name="userChargeDest"]:checked').value;
             const amount = (selectedApp && selectedApp.price) ? parseFloat(selectedApp.price) : parseFloat(document.getElementById('userChargeAmount').value);
             if (!amount || amount <= 0) { alert("❌ يرجى إدخال مبلغ صحيح!"); return; }
+            // collect custom fields
+            let cfValues = [];
+            const cfInputs = document.querySelectorAll('.user-cf-input');
+            for (const inp of cfInputs) {
+                const v = inp.value.trim();
+                if (inp.dataset.required === '1' && !v) { alert('❌ يرجى ملء خانة: ' + inp.dataset.label); return; }
+                if (v) cfValues.push({ label: inp.dataset.label, value: v });
+            }
             // الرصيد ثابت للعرض فقط - لا يتم التحقق منه
             let targetId = currentLoggedUser.id;
             if(chargeDest === 'other') {
@@ -3359,6 +3450,7 @@ function generateTxnCode() {
                 userName: currentLoggedUser.name, userId: currentLoggedUser.id, userKey: currentLoggedUser._key, 
                 amount: amount, destination: chargeDest, targetId: targetId, 
                 appKey: selectedApp._key, appName: selectedApp.name,
+                customFields: cfValues,
                 time: formattedTime, status: 'pending', staff: '' 
             };
             db.ref('user_requests').push().set(requestData).then(() => {
@@ -3366,6 +3458,7 @@ function generateTxnCode() {
                 document.getElementById('userRequestForm').reset();
                 toggleUserDestField();
                 selectedApp = null;
+                renderUserCustomFields(null);
                 const amtInp = document.getElementById('userChargeAmount');
                 if (amtInp) { amtInp.disabled = false; amtInp.style.opacity = '1'; }
                 renderAppsGrid();
@@ -3466,6 +3559,8 @@ function generateTxnCode() {
                 currentLoggedUser.debt = freshData.debt || 0;
             }
             document.getElementById('userBadge').innerHTML = 'المستخدم: <strong>' + currentLoggedUser.name + '</strong> | ID: ' + currentLoggedUser.id;
+            const menuName = document.getElementById('userMenuName');
+            if (menuName) menuName.innerText = currentLoggedUser.name + ' 🐱';
             document.getElementById('userBalanceValue').innerText = (currentLoggedUser.balance || 0).toFixed(2);
             document.getElementById('userDebtValue').innerText = (currentLoggedUser.debt || 0).toFixed(2);
             document.getElementById('userSelfIdDisplay').innerText = currentLoggedUser.id;
@@ -3573,12 +3668,28 @@ function generateTxnCode() {
         });
     }
 
+    let activeUserTab = null;
+    function toggleUserTab(tab) {
+        activeUserTab = (activeUserTab === tab) ? null : tab;
+        const co = document.getElementById('tabContentOrders');
+        const cp = document.getElementById('tabContentPayments');
+        if (co) co.style.display = (activeUserTab === 'orders') ? 'block' : 'none';
+        if (cp) cp.style.display = (activeUserTab === 'payments') ? 'block' : 'none';
+        const to = document.getElementById('tabOrders');
+        const tp = document.getElementById('tabPayments');
+        if (to) to.classList.toggle('active', activeUserTab === 'orders');
+        if (tp) tp.classList.toggle('active', activeUserTab === 'payments');
+    }
+
     function toggleUserDestField() {
         const dest = document.querySelector('input[name="userChargeDest"]:checked').value;
         document.getElementById('userOtherIdGroup').style.display = dest === 'other' ? 'block' : 'none';
     }
 
     function logoutUser() {
+        document.getElementById('userMenuOverlay').classList.remove('active');
+        document.querySelector('.hamburger-menu').classList.remove('active');
+        activeUserTab = null;
         currentLoggedUser = null; selectedApp = null;
         localStorage.removeItem('ali_recharge_remember');
         document.getElementById('userPortalPage').classList.remove('active');
@@ -3812,6 +3923,24 @@ function generateTxnCode() {
 
     function showAdminLoginFromMenu() {
         showAdminLogin();
+    }
+
+    function toggleAppMenu() {
+        const userPage = document.getElementById('userPortalPage');
+        if (userPage && userPage.classList.contains('active')) { toggleUserMenu(); }
+        else { toggleLoginMenu(); }
+    }
+
+    function toggleUserMenu() {
+        const overlay = document.getElementById('userMenuOverlay');
+        const hamburger = document.querySelector('.hamburger-menu');
+        overlay.classList.toggle('active');
+        hamburger.classList.toggle('active');
+    }
+
+    function closeUserMenu(event) {
+        if (event && event.target !== event.currentTarget) return;
+        toggleUserMenu();
     }
 
     function toggleLoginMenu() {
@@ -4315,7 +4444,12 @@ function generateTxnCode() {
             '\u23F0 *\u0627\u0644\u0648\u0642\u062A:* ' + requestData.time + '\n\n' +
             '\uD83D\uDD14 \u064A\u0631\u062C\u0649 \u0645\u0631\u0627\u062C\u0639\u0629 \u0644\u0648\u062D\u0629 \u0627\u0644\u062A\u062D\u0643\u0645 \u0644\u0644\u0645\u0648\u0627\u0641\u0642\u0629 \u0639\u0644\u0649 \u0627\u0644\u0637\u0644\u0628.';
 
-        sendTelegramToAllActiveBots(message);
+        let finalMsg = message;
+        if (requestData.customFields && requestData.customFields.length) {
+            finalMsg += '\n\uD83D\uDCCB *\u0628\u064A\u0627\u0646\u0627\u062A \u0625\u0636\u0627\u0641\u064A\u0629:*\n';
+            requestData.customFields.forEach(function(f) { finalMsg += '\u2022 ' + f.label + ': ' + f.value + '\n'; });
+        }
+        sendTelegramToAllActiveBots(finalMsg);
     }).catch(() => {
         const appInfo = requestData.appName ? '\uD83C\uDFAE *\u0627\u0644\u0628\u0631\u0646\u0627\u0645\u062C:* ' + requestData.appName + '\n' : '';
         const destText = requestData.destination === 'self' 
@@ -4334,7 +4468,12 @@ function generateTxnCode() {
             '\u23F0 *\u0627\u0644\u0648\u0642\u062A:* ' + requestData.time + '\n\n' +
             '\uD83D\uDD14 \u064A\u0631\u062C\u0649 \u0645\u0631\u0627\u062C\u0639\u0629 \u0644\u0648\u062D\u0629 \u0627\u0644\u062A\u062D\u0643\u0645 \u0644\u0644\u0645\u0648\u0627\u0641\u0642\u0629 \u0639\u0644\u0649 \u0627\u0644\u0637\u0644\u0628.';
 
-        sendTelegramToAllActiveBots(message);
+        let finalMsg = message;
+        if (requestData.customFields && requestData.customFields.length) {
+            finalMsg += '\n\uD83D\uDCCB *\u0628\u064A\u0627\u0646\u0627\u062A \u0625\u0636\u0627\u0641\u064A\u0629:*\n';
+            requestData.customFields.forEach(function(f) { finalMsg += '\u2022 ' + f.label + ': ' + f.value + '\n'; });
+        }
+        sendTelegramToAllActiveBots(finalMsg);
     });
 }
 
@@ -4505,7 +4644,12 @@ function sendToGoogleSheet(actionType, payload) {
             '\u23F0 *\u0627\u0644\u0648\u0642\u062A:* ' + requestData.time + '\n\n' +
             '\uD83D\uDD14 \u064A\u0631\u062C\u0649 \u0645\u0631\u0627\u062C\u0639\u0629 \u0644\u0648\u062D\u0629 \u0627\u0644\u062A\u062D\u0643\u0645 \u0644\u0644\u0645\u0648\u0627\u0641\u0642\u0629 \u0639\u0644\u0649 \u0627\u0644\u0637\u0644\u0628.';
 
-        sendTelegramToAllActiveBots(message);
+        let finalMsg = message;
+        if (requestData.customFields && requestData.customFields.length) {
+            finalMsg += '\n\uD83D\uDCCB *\u0628\u064A\u0627\u0646\u0627\u062A \u0625\u0636\u0627\u0641\u064A\u0629:*\n';
+            requestData.customFields.forEach(function(f) { finalMsg += '\u2022 ' + f.label + ': ' + f.value + '\n'; });
+        }
+        sendTelegramToAllActiveBots(finalMsg);
     }).catch(() => {
         const appInfo = requestData.appName ? '\uD83C\uDFAE *\u0627\u0644\u0628\u0631\u0646\u0627\u0645\u062C:* ' + requestData.appName + '\n' : '';
         const destText = requestData.destination === 'self' 
@@ -4524,7 +4668,12 @@ function sendToGoogleSheet(actionType, payload) {
             '\u23F0 *\u0627\u0644\u0648\u0642\u062A:* ' + requestData.time + '\n\n' +
             '\uD83D\uDD14 \u064A\u0631\u062C\u0649 \u0645\u0631\u0627\u062C\u0639\u0629 \u0644\u0648\u062D\u0629 \u0627\u0644\u062A\u062D\u0643\u0645 \u0644\u0644\u0645\u0648\u0627\u0641\u0642\u0629 \u0639\u0644\u0649 \u0627\u0644\u0637\u0644\u0628.';
 
-        sendTelegramToAllActiveBots(message);
+        let finalMsg = message;
+        if (requestData.customFields && requestData.customFields.length) {
+            finalMsg += '\n\uD83D\uDCCB *\u0628\u064A\u0627\u0646\u0627\u062A \u0625\u0636\u0627\u0641\u064A\u0629:*\n';
+            requestData.customFields.forEach(function(f) { finalMsg += '\u2022 ' + f.label + ': ' + f.value + '\n'; });
+        }
+        sendTelegramToAllActiveBots(finalMsg);
     });
 }
 
